@@ -59,7 +59,7 @@ fastai_types = {
     PathLikeOrBinaryStream:'PathLikeOrBinaryStream'
 }
 
-bn_types = (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)
+bn_types = (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.GroupNorm)
 bias_types = (nn.Linear, nn.Conv1d, nn.Conv2d, nn.Conv3d, nn.ConvTranspose1d, nn.ConvTranspose2d, nn.ConvTranspose3d)
 def is_pool_type(l:Callable): return re.search(r'Pool[123]d$', l.__class__.__name__)
 no_wd_types = bn_types + (nn.LayerNorm,)

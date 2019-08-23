@@ -29,6 +29,7 @@ def loss_batch(model:nn.Module, xb:Tensor, yb:Tensor, loss_func:OptLossFunc=None
     if not loss_func: return to_detach(out), yb[0].detach()
     loss = loss_func(out, *yb)
 
+    loss = cb_handler.on_loss_end(loss)
     if opt is not None:
         loss,skip_bwd = cb_handler.on_backward_begin(loss)
         if not skip_bwd:                     loss.backward()
@@ -399,12 +400,24 @@ class Learner():
         #TODO: get read of has_arg x and split_kwargs_by_func if possible
         #TODO: simplify this and refactor with pred_batch(...reconstruct=True)
         n_items = rows ** 2 if self.data.train_ds.x._square_show_res else rows
-        if self.dl(ds_type).batch_size < n_items: n_items = self.dl(ds_type).batch_size
+        #if self.dl(ds_type).batch_size < n_items: n_items = self.dl(ds_type).batch_size
         ds = self.dl(ds_type).dataset
-        self.callbacks.append(RecordOnCPU())
-        preds = self.pred_batch(ds_type)
+        rec_cpu = RecordOnCPU()
+        self.callbacks.append(rec_cpu)
+        cat_preds, mask_preds, x, cats, masks = [], [], [], [], []
+        for k, batch in zip(range(0, n_items, self.dl(ds_type).batch_size), self.dl(ds_type)):
+            cat_pred, mask_pred = self.pred_batch(ds_type, batch=batch)
+            cat_preds.append(cat_pred)
+            mask_preds.append(mask_pred)
+            x.append(rec_cpu.input)
+            cat, mask = rec_cpu.target
+            cats.append(cat)
+            masks.append(mask)
         *self.callbacks,rec_cpu = self.callbacks
-        x,y = rec_cpu.input,rec_cpu.target
+        x = torch.cat(x)
+        preds = (torch.cat(cat_preds), torch.cat(mask_preds))
+        y = (torch.cat(cats), torch.cat(masks))
+        #x,y = rec_cpu.input,rec_cpu.target
         norm = getattr(self.data,'norm',False)
         if norm:
             x = self.data.denorm(x)

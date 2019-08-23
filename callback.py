@@ -171,6 +171,8 @@ class Callback():
     def on_loss_begin(self, **kwargs:Any)->None:
         "Called after forward pass but before loss has been computed."
         pass
+    def on_loss_end(self, **kwargs:Any)->None:
+        pass
     def on_backward_begin(self, **kwargs:Any)->None:
         "Called after the forward pass and the loss has been computed, but before backprop."
         pass
@@ -284,6 +286,12 @@ class CallbackHandler():
         self.state_dict['last_output'] = out
         self('loss_begin', call_mets=False)
         return self.state_dict['last_output']
+
+    def on_loss_end(self, loss:Tensor)->Any:
+        self.smoothener.add_value(loss.detach().cpu())
+        self.state_dict['last_loss'], self.state_dict['smooth_loss'] = loss, self.smoothener.smooth
+        self('loss_end', call_mets=False)
+        return self.state_dict['last_loss']
 
     def on_backward_begin(self, loss:Tensor)->Tuple[Any,Any]:
         "Handle gradient calculation on `loss`."
