@@ -32,6 +32,7 @@ sidebar_d = {
                 'GeneralScheduler': '/callbacks.general_sched',
                 'CSV Logger': '/callbacks.csv_logger',
                 'Tracking': '/callbacks.tracker',
+                'Tensorboard': '/callbacks.tensorboard',
                 'Memory Profiling': '/callbacks.mem',
                 'Miscellaneous': '/callbacks.misc',
             }
@@ -67,7 +68,8 @@ sidebar_d = {
                 'Overview': '/tabular',
                 'tabular.transform': '/tabular.transform',
                 'tabular.data': '/tabular.data',
-                'tabular.models': '/tabular.models'
+                'tabular.models': '/tabular.models',
+                'tabular.learner': '/tabular.learner'
             },
         },
         'empty3': {
